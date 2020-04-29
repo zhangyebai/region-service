@@ -3,7 +3,9 @@ use actix_web::http::StatusCode;
 use actix_web::{error, http, web, HttpResponse, Result};
 use deadpool_postgres::{Client, Pool};
 use failure::Fail;
+//use log::info;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::models::area_model;
 
@@ -98,5 +100,29 @@ pub async fn list_simple_all_provinces(pool: web::Data<Pool>) -> Result<HttpResp
             name: e.to_string(),
         })?;
     Ok(HttpResponse::Ok().json(Resp::ok(Some(provinces))))
+    //todo!()
+}
+
+pub async fn list_cities_by_province_id(
+    query: web::Query<HashMap<String, String>>,
+    pool: web::Data<Pool>,
+) -> Result<HttpResponse, Exception> {
+    let pid = query
+        .get("pid")
+        .ok_or(Exception {
+            name: String::from("parameters are illegal"),
+        })?
+        .parse::<i32>()
+        .map_err(|_| Exception {
+            name: String::from("cant convert paramter into number"),
+        })?;
+
+    let client = pool.get().await.unwrap();
+    let cities = area_model::list_cities_by_province_id(&client, pid)
+        .await
+        .map_err(|e| Exception {
+            name: e.to_string(),
+        })?;
+    Ok(HttpResponse::Ok().json(Resp::ok(Some(cities))))
     //todo!()
 }

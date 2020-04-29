@@ -6,6 +6,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/region")
         .route("/provinces", web::get().to(area_route::provinces))
-        .route("/simple/provinces", web::get().to(area_route::list_simple_all_provinces)),
+        .route("/simple/provinces", web::get().to(area_route::list_simple_all_provinces))
+        .route("/simple/cities", web::get().to(area_route::list_cities_by_province_id)),
     );
 }
